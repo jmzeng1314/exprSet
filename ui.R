@@ -1,5 +1,15 @@
 library(shiny)
 library(shinydashboard) 
+library(shinyBS)
+library(GGally)
+library(ggplot2)
+#library(shinyAce)
+library(knitr)
+library(rmarkdown)
+library(RCurl)
+library(shinyjs)
+library(DT)
+
 suppressMessages(library(clusterProfiler))
 suppressMessages(library(org.Hs.eg.db))
 suppressMessages(library(edgeR))
@@ -9,10 +19,92 @@ suppressMessages(library(limma))
 options(stringsAsFactors = F) 
 #options(encoding = 'UTF-8')
 page_Home <- fluidPage(
-  
+  includeMarkdown("README.md") 
 )
+ 
 page_INPUT <- fluidPage(
-  ## first row: two boxs 
+  ################################# Data Upload (start) #####################################
+  ### three box in a row, for expression matrix / genes annotation /  group information 
+  ################################# Data Upload (start) #####################################
+  
+  fluidRow( 
+    box(title = "upload files", 
+        width = 12, solidHeader = TRUE, status = "primary",
+      
+        
+      radioButtons("dataInput", "", 
+                   list("Upload 3 files" = 2, "Load example data" = 1), selected=2),
+      
+      conditionalPanel(condition="input.dataInput=='1'",
+                       h5("Example dataset:"),
+                       radioButtons("sampleData_exprSet", "", 
+                                    list("airway(RNA-seq)"=1,'sCLLex(microarray)'=2), 
+                                    selected=2)
+      ),
+      
+      conditionalPanel(condition="input.dataInput=='2'",
+                       h5("Upload a delimited text file for expression matrix : "),
+                       
+                       fileInput("upload_exprSet", "", multiple = FALSE),
+                       
+                       radioButtons("fileSepDF_exprSet", "Delimiter:", 
+                                    list("Comma"=1,"Tab"=2,"Semicolon"=3,"Space"=4),
+                                    selected=2,inline = T),
+                       
+                       h5("Upload a delimited text file for  group information : "),
+                       fileInput("upload_groupInfo", "", multiple = FALSE),
+                       
+                       radioButtons("fileSepDF_groupInfo", "Delimiter:", 
+                                    list("Comma"=1,"Tab"=2,"Semicolon"=3,"Space"=4),
+                                    selected=2,inline = T),
+                       
+                       h5("Upload a delimited text file for genes annotation : "),
+                       fileInput("upload_geneInfo", "", multiple = FALSE),
+                       
+                       radioButtons("fileSepDF_geneInfo", "Delimiter:", 
+                                    list("Comma"=1,"Tab"=2,"Semicolon"=3,"Space"=4),
+                                    selected=2,inline = T),
+                       
+                       HTML('<p>You can upload your data as separated by comma, tab, semicolon or space.</p>'),
+                       HTML('<p>Note: First row must be header.</p>')
+      ),
+      
+      br()
+    ) ## end for box 
+     
+    ),  ### end for fluidRow 
+  
+  ################################# Data Upload (end) #####################################
+  
+  
+  
+  ################################# Data tables #####################################
+  fluidRow(
+    tabBox(
+      title="Your input data:",width = 12,
+      tabPanel('exprSet',DT::dataTableOutput("exprSet")),
+      tabPanel('groupInfo', DT::dataTableOutput("groupInfo")),
+      tabPanel('geneInfo',DT::dataTableOutput("geneInfo"))
+    )
+
+  ),
+  ################################# Data visualization #####################################
+  fluidRow(
+    tabBox(
+      title="Quality control",width = 12,
+      tabPanel('boxplot',plotOutput("p1_boxplot")),
+      tabPanel('histogram',plotOutput("p1_histogram")),
+      tabPanel('density',plotOutput("p1_density")),
+       
+      tabPanel('gpairs',h4("time consuming,I don't want to draw this figure for you!!!")),
+      tabPanel('cluster',plotOutput("p1_cluster")),
+      
+      tabPanel('PCA',plotOutput("p1_PCA")),
+      tabPanel('heatmap',plotOutput("p1_heatmap"))
+    )
+    
+  ),
+  
   fluidRow(
     box(
       title = "Box title", width = 6, status = "primary"
@@ -83,7 +175,7 @@ sidebar = dashboardSidebar(
     sidebarMenu(
       id = "tabs",
       hr(),
-      menuItem("绘图大全简介",tabName = "Home",icon = icon("home")),
+      menuItem("简介",tabName = "Home",icon = icon("home")),
       menuItem("step1:上传输入文件",   tabName = "INPUT",icon = icon("flask") 
                ),
       menuItem("step2:自定义差异分析",tabName = "DEG",icon = icon("flask")),
