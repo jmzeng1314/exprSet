@@ -9,6 +9,7 @@ library(rmarkdown)
 library(RCurl)
 library(shinyjs)
 library(DT)
+library(rmarkdown)
 
 suppressMessages(library(clusterProfiler))
 suppressMessages(library(org.Hs.eg.db))
@@ -23,6 +24,7 @@ page_Home <- fluidPage(
 )
  
 page_INPUT <- fluidPage(
+  tags$script(src="getIP.js"),
   ################################# Data Upload (start) #####################################
   ### three box in a row, for expression matrix / genes annotation /  group information 
   ################################# Data Upload (start) #####################################
@@ -161,7 +163,9 @@ page_GSEA <- fluidPage(
   
 ) 
 page_About <- fluidPage(
-  
+  p('都到这里来了，可能是想捐赠一下吧，我可以升级服务器哦'),
+  tags$img(src = "http://www.bio-info-trainee.com/wp-content/uploads/2016/09/jimmy-donate.jpg", 
+           width = "300px", height = "300px")
 )
 
 header=dashboardHeader(

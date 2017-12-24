@@ -6,7 +6,16 @@ createLink <- function(link,char) {
   sprintf('<a href="%s" target="_blank" class="btn btn-primary">%s</a>',link,char)
 }
 
+log_cat <- function(info='hello world~',file='log.txt'){
+  cat(as.character(Sys.time()),info ,"\n",file=file,append=TRUE)
+}
+
 shinyServer(function(input, output, session){
+  IP <- reactive({ 
+    tmp<-input$getIP 
+    as.character(tmp$ip)
+  })
+  
   ## pre-defined global variables 
   gVs <- reactiveValues(
     userID = NULL,
@@ -109,6 +118,7 @@ shinyServer(function(input, output, session){
   
   output$exprSet <- DT::renderDataTable({ 
     tmp=dataLoad() 
+    log_cat(paste0('data', Sys.Date(),' ',IP()))
     gVs$groupInfo=tmp$groupInfo
     gVs$exprSet=tmp$exprSet
     gVs$geneInfo=tmp$geneInfo
